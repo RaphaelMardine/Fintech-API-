@@ -7,7 +7,7 @@ const customers = []
 
 //Middleware
 function verifyIfExistsAccountCPF(req, res, next) {
-  const { cpf } = req.headers
+  const { cpf } = req.header
   const customer = customers.find(customer => customer.cpf === cpf)
   if (!customer) {
     return res.status(400).json({ error: 'Customer Not Found' })
@@ -90,5 +90,27 @@ app.get('statement/date', verifyIfExistsAccountCPF, (req, res) => {
   )
 
   return res.json(customer.statement)
+})
+
+app.put('/account', verifyIfExistsAccountCPF, (req, res) => {
+  const { name } = req.body
+  const { customer } = req
+  customer.name = name
+  return res.status(201).send()
+})
+app.get('/account', verifyIfExistsAccountCPF, (req, res) => {
+  const { customer } = req
+  return res.json(customer)
+})
+app.delete('/account', verifyIfExistsAccountCPF, (req, res) => {
+  const { customer } = req
+
+  customers.splice(customer, 1)
+  return res.status(200).json(customers)
+})
+app.get('/balance', verifyIfExistsAccountCPF, (req, res) => {
+  const { customer } = req
+  const balance = getBalance(customer.statement)
+  return res.json(balance)
 })
 app.listen(3333)
